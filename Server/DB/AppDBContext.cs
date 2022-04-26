@@ -16,13 +16,12 @@ namespace Server.DB
 
         static readonly ILoggerFactory _logger = LoggerFactory.Create(builder => { builder.AddConsole(); });
 
-        string _connectionString = @"server=localhost;database=gamedb;uid=root;password=keAarwrm76*;";
-
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options
                 .UseLoggerFactory(_logger)
-                .UseMySql(connectionString: (ConfigManager.Config != null ? ConfigManager.Config.connectionString : _connectionString),
+                .UseMySql(connectionString: (ConfigManager.Config != null ? ConfigManager.Config.connectionString :
+                "server=localhost;database=gamedb;uid=root;password=keAarwrm76*;"),
                 new MySqlServerVersion(new Version(10, 4, 17)));
         }
 
