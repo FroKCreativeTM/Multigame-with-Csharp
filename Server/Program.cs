@@ -52,12 +52,11 @@ namespace Server
 			//FlushRoom();
 			//JobTimer.Instance.Push(FlushRoom);
 
-			// TODO
-			while (true)
-			{
-				//JobTimer.Instance.Flush();
-				Thread.Sleep(100);
-			}
+			// DB Job들을 처리할 수 있게
+			while(true)
+            {
+				DbTransaction.Instance.Flush();
+            }
 		}
 	}
 }
