@@ -47,6 +47,6 @@ namespace Server.DB
         [ForeignKey("Owner")]
         // ? -> nullable
         public int? OwnerDbId { get; set; }
-        public PlayerDb Onwer { get; set; }
+        public PlayerDb Owner { get; set; }
     }
 }

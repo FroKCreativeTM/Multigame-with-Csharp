@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Server.DB;
 using Server.Game;
+using Server.Game.Item;
 using ServerCore;
 using System;
 using System.Collections.Generic;
@@ -107,6 +108,32 @@ namespace Server
 				MyPlayer.Info.PosInfo.PosY = 0;
 				MyPlayer.Stat.MergeFrom(playerInfo.StatInfo);
 				MyPlayer.Session = this;
+
+				S_ItemList itemListPacket = new S_ItemList();
+
+				using (AppDBContext db = new AppDBContext())
+                {
+					// 아이템 리스트를 들고 온다.
+					List<ItemDb> items = db.Items
+						.Where(i => i.OwnerDbId == playerInfo.PlayerDbId)
+						.ToList();
+
+					// 아이템을 순회하자
+					foreach (ItemDb itemDb in items)
+					{
+						Item item = Item.MakeItem(itemDb);
+						if (item != null)
+						{
+							MyPlayer._Inventory.Add(item);
+
+							ItemInfo info = new ItemInfo();
+							info.MergeFrom(item.Info);
+							itemListPacket.Items.Add(info);
+						}
+					}
+				}
+				// 아이템 리스트 패킷을 클라이언트에 전달한다.
+				Send(itemListPacket);
 			}
 
 			ServerState = PlayerServerState.ServerStateGame;
@@ -123,7 +150,7 @@ namespace Server
 
 			using (AppDBContext db = new AppDBContext())
 			{
-				PlayerDb findPlayer = db.PlayerDbs
+				PlayerDb findPlayer = db.Players
 					.Where(p => p.PlayerName == createPacket.Name).FirstOrDefault();
 
 				if (findPlayer != null)
@@ -150,7 +177,7 @@ namespace Server
 						AccountDBId = AccountDbId
 					};
 
-					db.PlayerDbs.Add(newPlayerDb);
+					db.Players.Add(newPlayerDb);
 					bool success = db.SaveChangesEx();
 					if (success == false)
 						return;
