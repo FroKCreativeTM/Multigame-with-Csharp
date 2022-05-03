@@ -24,14 +24,19 @@ namespace Server.Game.Item
         {
             get { return Info.TemplateId; }
             set { Info.TemplateId = value; }
-        }
-        public int Count
-        {
-            get { return Info.Count; }
-            set { Info.Count = value; }
-        }
+		}
+		public int Count
+		{
+			get { return Info.Count; }
+			set { Info.Count = value; }
+		}
+		public int Slot
+		{
+			get { return Info.Slot; }
+			set { Info.Slot = value; }
+		}
 
-        public ItemType ItemType { get; private set; }
+		public ItemType ItemType { get; private set; }
         public bool Stackable { get; protected set; }    // 겹칠 수 있는 아이템인가
 
         public Item(ItemType itemType)
@@ -67,7 +72,8 @@ namespace Server.Game.Item
             {
                 item.ItemDbId = itemDb.ItemDbId;
                 item.Count = itemDb.Count;
-            }
+				item.Slot = itemDb.Slot;
+			}
 
             return item;
         }

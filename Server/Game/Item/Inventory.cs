@@ -40,7 +40,7 @@ namespace Server.Game.Item
         {
             for (int slot = 0; slot < 20; slot++)
             {
-                Item item = _items.Values.FirstOrDefault(i => i.Info.Slot == slot);
+                Item item = _items.Values.FirstOrDefault(i => i.Slot == slot);
 
                 // 만약 비어있다면
                 if (item == null)
