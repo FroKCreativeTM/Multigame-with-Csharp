@@ -1,5 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Protobuf.Protocol;
+using Microsoft.EntityFrameworkCore;
+using Server.Data;
 using Server.Game;
+using Server.Game.Item;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +46,58 @@ namespace Server.DB
                     }
                 }
             });            
+        }
+
+        // 실행 주체 Player -> DB -> Player
+        public static void RewardToPlayer(Player player, RewardData reward, GameRoom room)
+        {
+            if (player == null || room == null || reward == null)
+                return;
+
+            // 빈 슬롯을 찾는다.
+            // 빈 슬롯이 없다면 return
+            // WARNING! 멀티스레드 문제!
+            int? slot = player._Inventory.GetEmptySlot();
+            if (slot == null)
+                return;
+
+            ItemDb newItem = new ItemDb()
+            {
+                TemplateId = reward.itemId,
+                Count = reward.count,
+                Slot = 0,       // 어떻게 가져올까
+                OwnerDbId = player.PlayerDbId,
+            };
+
+            // DB에겐 행동 일감을 job단위로 보내주자.
+            Instance.Push(() =>
+            {
+                using (AppDBContext db = new AppDBContext())
+                {
+                    // 새로 만드는 거니까 Add
+                    db.Items.Add(newItem);
+                    bool success = db.SaveChangesEx();
+
+                    // 만약 실행된 경우
+                    if (success)
+                    {
+                        room.Push(() => {
+                            Item item = Item.MakeItem(newItem);
+                            player._Inventory.Add(item);
+
+                            // TODO : 클라이언트한테 Notify
+                            {
+                                S_AddItem itemPacket = new S_AddItem();
+                                ItemInfo itemInfo = new ItemInfo();
+                                itemInfo.MergeFrom(item.Info);
+                                itemPacket.Items.Add(itemInfo);
+
+                                player.Session.Send(itemPacket);
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 }

@@ -127,4 +127,44 @@ namespace Server.Data
 		}
 	}
 	#endregion
+
+	#region Monster
+
+	[Serializable]
+	// 이벤트로도 데이터를 줄 수 있는 점 감안해야한다.
+	public class RewardData
+    {
+		public int probability;     // 100분율을 이용해서 아이템 떨굴 확률
+		public int itemId;
+		public int count;
+    }
+
+	[Serializable]
+	public class MonsterData
+    {
+		public int id;			// 몇 번 몬스터인가
+		public string name;		// 아이템과 마찬가지로,
+								// 다국어 지원시 스트링 시트를 담아준다.
+		public StatInfo stat;
+		public List<RewardData> rewards;
+
+		// 클라이언트는 prefab path data 필요
+    }
+
+	[Serializable]
+	public class MonsterLoader : ILoader<int, MonsterData>
+	{
+		public List<MonsterData> monsters = new List<MonsterData>();
+
+		public Dictionary<int, MonsterData> MakeDict()
+		{
+			Dictionary<int, MonsterData> dict = new Dictionary<int, MonsterData>();
+			foreach (MonsterData monster in monsters)
+			{
+				dict.Add(monster.id, monster);
+			}
+			return dict;
+		}
+	}
+	#endregion
 }

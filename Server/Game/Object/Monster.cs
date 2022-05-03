@@ -1,5 +1,6 @@
 ﻿using Google.Protobuf.Protocol;
 using Server.Data;
+using Server.DB;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
@@ -9,16 +10,21 @@ namespace Server.Game
 {
 	public class Monster : GameObject
 	{
+		public int TemplateId { get; private set; }
+
 		public Monster()
 		{
 			ObjectType = GameObjectType.Monster;
+		}
 
-			// TEMP
-			Stat.Level = 1;
-			Stat.Hp = 100;
-			Stat.MaxHp = 100;
-			Stat.Speed = 5.0f;
+		public void Init(int templateId)
+		{
+			TemplateId = templateId;
 
+			MonsterData monsterData = null;
+			DataManager.MonsterDict.TryGetValue(templateId, out monsterData);
+			Stat.MergeFrom(monsterData.stat);
+			Stat.Hp = monsterData.stat.MaxHp;
 			State = CreatureState.Idle;
 		}
 
@@ -185,5 +191,50 @@ namespace Server.Game
 		{
 
 		}
+
+
+		public override void OnDead(GameObject attacker)
+		{
+			base.OnDead(attacker);
+
+			// 화살같은 경우엔 이에 대한 소유자
+			// 그 외에는 공격 대상자를 반환을 받아야한다.
+			GameObject owner = attacker.GetOwner();
+			// 몬스터는 죽으면서 아이템을 남긴다.
+			// 데이터 베이스 뿐만 아니라 데이터 시트를 디자인할 능력 필요하다!
+			if(owner.ObjectType == GameObjectType.Player)
+            {
+				RewardData reward = GetRandomReward();
+				if (reward != null)
+				{
+					 Player player = owner as Player;
+
+					// 안전하게!
+					// DB에서 아이템을 만들어달라 요청한 뒤 
+					// 성공적으로 완수하면 이 정보를 가져오는 식으로 하자.
+					// 플레이어와 보상 그리고 몬스터와 플레이어가 있는 Room을 넘긴다.
+					DbTransaction.RewardToPlayer(player, reward, Room);
+				}
+			}
+		}
+
+		RewardData GetRandomReward()
+        {
+			MonsterData monsterData = null;
+			DataManager.MonsterDict.TryGetValue(TemplateId, out monsterData);
+
+			int rand = new Random().Next(0, 101);
+			int sum = 0;
+			foreach(RewardData reward in monsterData.rewards)
+            {
+				sum += reward.probability;
+				if(rand < sum)
+                {
+					return reward;
+                }
+            }
+
+			return null;
+        }
 	}
 }

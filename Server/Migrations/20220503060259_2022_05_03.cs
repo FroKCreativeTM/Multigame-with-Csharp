@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Server.Migrations
 {
-    public partial class Initial : Migration
+    public partial class _2022_05_03 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -40,7 +40,7 @@ namespace Server.Migrations
                     Hp = table.Column<int>(type: "int", nullable: false),
                     MaxHp = table.Column<int>(type: "int", nullable: false),
                     Attack = table.Column<int>(type: "int", nullable: false),
-                    Speed = table.Column<int>(type: "int", nullable: false),
+                    Speed = table.Column<float>(type: "float", nullable: false),
                     TotalExp = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -55,11 +55,38 @@ namespace Server.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "Item",
+                columns: table => new
+                {
+                    ItemDbId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    TemplateId = table.Column<int>(type: "int", nullable: false),
+                    Count = table.Column<int>(type: "int", nullable: false),
+                    Slot = table.Column<int>(type: "int", nullable: false),
+                    OwnerDbId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Item", x => x.ItemDbId);
+                    table.ForeignKey(
+                        name: "FK_Item_Player_OwnerDbId",
+                        column: x => x.OwnerDbId,
+                        principalTable: "Player",
+                        principalColumn: "PlayerDBId");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_Account_AccountName",
                 table: "Account",
                 column: "AccountName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Item_OwnerDbId",
+                table: "Item",
+                column: "OwnerDbId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Player_AccountDBId",
@@ -75,6 +102,9 @@ namespace Server.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Item");
+
             migrationBuilder.DropTable(
                 name: "Player");
 

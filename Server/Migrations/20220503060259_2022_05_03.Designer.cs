@@ -11,8 +11,8 @@ using Server.DB;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20220502155221_Item")]
-    partial class Item
+    [Migration("20220503060259_2022_05_03")]
+    partial class _2022_05_03
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,9 +47,6 @@ namespace Server.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OnwerPlayerDBId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("OwnerDbId")
                         .HasColumnType("int");
 
@@ -61,7 +58,7 @@ namespace Server.Migrations
 
                     b.HasKey("ItemDbId");
 
-                    b.HasIndex("OnwerPlayerDBId");
+                    b.HasIndex("OwnerDbId");
 
                     b.ToTable("Item");
                 });
@@ -108,11 +105,11 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.DB.ItemDb", b =>
                 {
-                    b.HasOne("Server.DB.PlayerDb", "Onwer")
+                    b.HasOne("Server.DB.PlayerDb", "Owner")
                         .WithMany("Items")
-                        .HasForeignKey("OnwerPlayerDBId");
+                        .HasForeignKey("OwnerDbId");
 
-                    b.Navigation("Onwer");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Server.DB.PlayerDb", b =>

@@ -45,9 +45,6 @@ namespace Server.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OnwerPlayerDBId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("OwnerDbId")
                         .HasColumnType("int");
 
@@ -59,7 +56,7 @@ namespace Server.Migrations
 
                     b.HasKey("ItemDbId");
 
-                    b.HasIndex("OnwerPlayerDBId");
+                    b.HasIndex("OwnerDbId");
 
                     b.ToTable("Item");
                 });
@@ -106,11 +103,11 @@ namespace Server.Migrations
 
             modelBuilder.Entity("Server.DB.ItemDb", b =>
                 {
-                    b.HasOne("Server.DB.PlayerDb", "Onwer")
+                    b.HasOne("Server.DB.PlayerDb", "Owner")
                         .WithMany("Items")
-                        .HasForeignKey("OnwerPlayerDBId");
+                        .HasForeignKey("OwnerDbId");
 
-                    b.Navigation("Onwer");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Server.DB.PlayerDb", b =>

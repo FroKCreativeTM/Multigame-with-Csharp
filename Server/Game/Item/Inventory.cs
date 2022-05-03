@@ -33,5 +33,21 @@ namespace Server.Game.Item
             }
             return null;
         }
+
+        // 빈 슬롯을 반환
+        // 없으면 null
+        public int? GetEmptySlot()
+        {
+            for (int slot = 0; slot < 20; slot++)
+            {
+                Item item = _items.Values.FirstOrDefault(i => i.Info.Slot == slot);
+
+                // 만약 비어있다면
+                if (item == null)
+                    return slot;
+            }
+
+            return null;
+        }
     }
 }
