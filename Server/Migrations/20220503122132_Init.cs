@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Server.Migrations
 {
-    public partial class _2022_05_03 : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -64,6 +64,7 @@ namespace Server.Migrations
                     TemplateId = table.Column<int>(type: "int", nullable: false),
                     Count = table.Column<int>(type: "int", nullable: false),
                     Slot = table.Column<int>(type: "int", nullable: false),
+                    Equipped = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     OwnerDbId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

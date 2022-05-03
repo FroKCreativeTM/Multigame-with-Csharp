@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server.Game.Item
+namespace Server.Game
 {
     // 서버가 메모리에 들고 있는 아이템 정보
     public class Item

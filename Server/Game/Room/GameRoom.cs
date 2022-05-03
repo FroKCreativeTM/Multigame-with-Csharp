@@ -2,14 +2,13 @@
 using Google.Protobuf.Protocol;
 using Server.Data;
 using Server.DB;
-using Server.Game.Item;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Server.Game
 {
-	public class GameRoom : JobSerializer
+	public partial class GameRoom : JobSerializer
 	{
 		public int RoomId { get; set; }
 
@@ -38,11 +37,6 @@ namespace Server.Game
 				monster.Update();
 			}
 
-			foreach (Projectile projectile in _projectiles.Values)
-			{
-				projectile.Update();
-			}
-
 			Flush();
 		}
 
@@ -58,6 +52,8 @@ namespace Server.Game
 				Player player = gameObject as Player;
 				_players.Add(gameObject.Id, player);
 				player.Room = this;
+
+				player.RefreshAdditionalStat();
 
 				Map.ApplyMove(player, new Vector2Int(player.CellPos.x, player.CellPos.y));
 
@@ -96,6 +92,8 @@ namespace Server.Game
 				Projectile projectile = gameObject as Projectile;
 				_projectiles.Add(gameObject.Id, projectile);
 				projectile.Room = this;
+
+				Push(projectile.Update);
 			}
 			
 			// 타인한테 정보 전송
@@ -109,7 +107,6 @@ namespace Server.Game
 				}
 			}
 		}
-
 
         public void LeaveGame(int objectId)
 		{
@@ -188,76 +185,6 @@ namespace Server.Game
 			resMovePacket.PosInfo = movePacket.PosInfo;
 
 			Broadcast(resMovePacket);
-		}
-
-		public void HandleSkill(Player player, C_Skill skillPacket)
-		{
-			if (player == null)
-				return;
-
-			ObjectInfo info = player.Info;
-			if (info.PosInfo.State != CreatureState.Idle)
-				return;
-
-			// TODO : 스킬 사용 가능 여부 체크
-			info.PosInfo.State = CreatureState.Skill;
-			S_Skill skill = new S_Skill() { Info = new SkillInfo() };
-			skill.ObjectId = info.ObjectId;
-			skill.Info.SkillId = skillPacket.Info.SkillId;
-			Broadcast(skill);
-
-			Data.Skill skillData = null;
-			if (DataManager.SkillDict.TryGetValue(skillPacket.Info.SkillId, out skillData) == false)
-				return;
-
-			switch (skillData.skillType)
-			{
-				case SkillType.SkillAuto:
-					{
-						Vector2Int skillPos = player.GetFrontCellPos(info.PosInfo.MoveDir);
-						GameObject target = Map.Find(skillPos);
-						if (target != null)
-						{
-							Console.WriteLine("Hit GameObject !");
-						}
-					}
-					break;
-				case SkillType.SkillProjectile:
-					{
-						Arrow arrow = ObjectManager.Instance.Add<Arrow>();
-						if (arrow == null)
-							return;
-
-						arrow.Owner = player;
-						arrow.Data = skillData;
-						arrow.PosInfo.State = CreatureState.Moving;
-						arrow.PosInfo.MoveDir = player.PosInfo.MoveDir;
-						arrow.PosInfo.PosX = player.PosInfo.PosX;
-						arrow.PosInfo.PosY = player.PosInfo.PosY;
-						arrow.Speed = skillData.projectile.speed;
-						Push(EnterGame, arrow);
-					}
-					break;
-			}
-		}
-		public void HandleEquipItem(Player player, C_EquipItem equipPacket)
-		{
-			if (player == null)
-				return;
-
-			Item.Item item = player._Inventory.get(equipPacket.ItemDbID);
-			if (item == null)
-				return;
-
-			item.Equipped = equipPacket.Equipped;
-
-			// DB에 전달
-			DbTransaction.EquipItemNotify(player, item);
-
-			S_EquipItem equipOkPacket = new S_EquipItem();
-			equipOkPacket.ItemDbId = equipPacket.ItemDbID;
-			equipOkPacket.Equipped = equipPacket.Equipped;
-			player.Session.Send(equipOkPacket);
 		}
 
 		public Player FindPlayer(Func<GameObject, bool> condition)

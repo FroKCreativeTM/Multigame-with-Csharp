@@ -11,8 +11,8 @@ using Server.DB;
 namespace Server.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20220503083055_Equipped")]
-    partial class Equipped
+    [Migration("20220503122132_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
