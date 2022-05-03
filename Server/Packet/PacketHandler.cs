@@ -65,4 +65,22 @@ class PacketHandler
 		ClientSession clientSession = session as ClientSession;
 		clientSession.HandleCreatePlayer(createPacket);
 	}
+
+	public static void C_EquipItemHandler(PacketSession session, IMessage packet)
+	{
+		C_EquipItem equipPacket = packet as C_EquipItem;
+		ClientSession clientSession = session as ClientSession;
+
+		Player player = clientSession.MyPlayer;
+		// 플레이어가 존재하지 않는다면 보낼 필요 없는 패킷이다!
+		// 아주 무시무시한!
+		if(player == null)
+			return;
+
+		GameRoom room = player.Room;
+		if (room == null)
+			return;
+
+		room.Push(room.HandleEquipItem, player, equipPacket);
+	}
 }

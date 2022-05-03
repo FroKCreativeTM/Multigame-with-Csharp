@@ -41,8 +41,9 @@ namespace Server.DB
         public int ItemDbId { get; set; } // 데이터베이스에서 지정해주는 아이디
         public int TemplateId { get; set; } // 데이터 시트 상에서의 아이디
         public int Count { get; set; }
-
         public int Slot { get; set; }
+        public bool Equipped { get; set; } = false;
+        
 
         [ForeignKey("Owner")]
         // ? -> nullable

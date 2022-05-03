@@ -35,6 +35,11 @@ namespace Server.Game.Item
 			get { return Info.Slot; }
 			set { Info.Slot = value; }
 		}
+		public bool Equipped
+		{
+			get { return Info.Equipped; }
+			set { Info.Equipped = value; }
+		}
 
 		public ItemType ItemType { get; private set; }
         public bool Stackable { get; protected set; }    // 겹칠 수 있는 아이템인가
@@ -73,6 +78,7 @@ namespace Server.Game.Item
                 item.ItemDbId = itemDb.ItemDbId;
                 item.Count = itemDb.Count;
 				item.Slot = itemDb.Slot;
+				item.Equipped = itemDb.Equipped;
 			}
 
             return item;

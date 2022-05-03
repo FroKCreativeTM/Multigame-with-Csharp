@@ -16,7 +16,7 @@ namespace Server.DB
     // - 스레드에게?
     // -- 문제는 DB 작업은 결과를 받아서 이어서 처리해야되는 경우도 많음
     // 이런 문제를 해결하자!
-    public class DbTransaction : JobSerializer
+    public partial class DbTransaction : JobSerializer
     {
         public static DbTransaction Instance { get; } = new DbTransaction();
 
@@ -65,7 +65,7 @@ namespace Server.DB
             {
                 TemplateId = reward.itemId,
                 Count = reward.count,
-                Slot = 0,       // 어떻게 가져올까
+                Slot = slot.Value,       
                 OwnerDbId = player.PlayerDbId,
             };
 
@@ -99,5 +99,6 @@ namespace Server.DB
                 }
             });
         }
+
     }
 }

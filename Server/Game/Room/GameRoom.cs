@@ -1,6 +1,8 @@
 ﻿using Google.Protobuf;
 using Google.Protobuf.Protocol;
 using Server.Data;
+using Server.DB;
+using Server.Game.Item;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -108,7 +110,8 @@ namespace Server.Game
 			}
 		}
 
-		public void LeaveGame(int objectId)
+
+        public void LeaveGame(int objectId)
 		{
 			GameObjectType type = ObjectManager.GetObjectTypeById(objectId);
 
@@ -236,6 +239,25 @@ namespace Server.Game
 					}
 					break;
 			}
+		}
+		public void HandleEquipItem(Player player, C_EquipItem equipPacket)
+		{
+			if (player == null)
+				return;
+
+			Item.Item item = player._Inventory.get(equipPacket.ItemDbID);
+			if (item == null)
+				return;
+
+			item.Equipped = equipPacket.Equipped;
+
+			// DB에 전달
+			DbTransaction.EquipItemNotify(player, item);
+
+			S_EquipItem equipOkPacket = new S_EquipItem();
+			equipOkPacket.ItemDbId = equipPacket.ItemDbID;
+			equipOkPacket.Equipped = equipPacket.Equipped;
+			player.Session.Send(equipOkPacket);
 		}
 
 		public Player FindPlayer(Func<GameObject, bool> condition)
