@@ -27,7 +27,9 @@ namespace Server.Game
 				S_Move movePacket = new S_Move();
 				movePacket.ObjectId = Id;
 				movePacket.PosInfo = PosInfo;
-				Room.Broadcast(movePacket);
+
+				// 존 안의 자기의 위치를 넘겨준다.
+				Room.Broadcast(CellPos, movePacket);
 
 				Console.WriteLine("Move Arrow");
 			}

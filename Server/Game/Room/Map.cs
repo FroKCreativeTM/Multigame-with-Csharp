@@ -2,9 +2,7 @@
 using ServerCore;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
 
 namespace Server.Game
 {
@@ -161,6 +159,57 @@ namespace Server.Game
 				int y = MaxY - dest.y;
 				_objects[y, x] = gameObject;
 			}
+
+			// 존 체크
+			GameObjectType type = ObjectManager.GetObjectTypeById(gameObject.Id);
+            switch (type)
+            {
+				case GameObjectType.Player:
+					{
+						Player p = gameObject as Player;
+
+						Zone now = gameObject.Room.GetZone(gameObject.CellPos);
+						Zone next = gameObject.Room.GetZone(dest);
+
+						// 존의 변경이 진행된 경우
+						if (now != next)
+						{
+							now.Players.Remove(p);
+							next.Players.Add(p);
+						}
+					}
+					break;
+				case GameObjectType.Monster:
+					{
+						Monster m = gameObject as Monster;
+
+						Zone now = gameObject.Room.GetZone(gameObject.CellPos);
+						Zone next = gameObject.Room.GetZone(dest);
+
+						// 존의 변경이 진행된 경우
+						if (now != next)
+						{
+							now.Monsters.Remove(m);
+							next.Monsters.Add(m);
+						}
+					}
+					break;
+				case GameObjectType.Projectile:
+					{
+						Projectile p = gameObject as Projectile;
+
+						Zone now = gameObject.Room.GetZone(gameObject.CellPos);
+						Zone next = gameObject.Room.GetZone(dest);
+
+						// 존의 변경이 진행된 경우
+						if (now != next)
+						{
+							now.Projectiles.Remove(p);
+							next.Projectiles.Add(p);
+						}
+					}
+					break;
+            }
 
 			// 실제 좌표 이동
 			posInfo.PosX = dest.x;

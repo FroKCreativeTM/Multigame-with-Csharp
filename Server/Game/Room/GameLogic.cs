@@ -13,7 +13,7 @@ namespace Server.Game
 		public GameRoom Add(int mapId)
 		{
 			GameRoom gameRoom = new GameRoom();
-			gameRoom.Push(gameRoom.Init, mapId);
+			gameRoom.Push(gameRoom.Init, mapId, 10);
 
 			gameRoom.RoomId = _roomId;
 			_rooms.Add(_roomId, gameRoom);
