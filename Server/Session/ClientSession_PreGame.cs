@@ -137,8 +137,12 @@ namespace Server
 
 			ServerState = PlayerServerState.ServerStateGame;
 
-			GameRoom room = RoomManager.Instance.Find(1);
-			room.Push(room.EnterGame, MyPlayer);
+			// 하나의 일감처럼 처리
+			GameLogic.Instance.Push(() =>
+			{
+				GameRoom room = GameLogic.Instance.Find(1);
+				room.Push(room.EnterGame, MyPlayer);
+			});
 		}
 
 		public void HandleCreatePlayer(C_CreatePlayer createPacket)

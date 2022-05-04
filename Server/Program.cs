@@ -20,26 +20,48 @@ namespace Server
 	class Program
 	{
 		static Listener _listener = new Listener();
-		static List<System.Timers.Timer> _timers = new List<System.Timers.Timer>();
 
-		static void TickRoom(GameRoom room, int tick = 100)
+		// 게임의 로직들을 담당한다.
+		static void GameLogicTask()
 		{
-			var timer = new System.Timers.Timer();
-			timer.Interval = tick;
-			timer.Elapsed += ((s, e) => { room.Update(); });
-			timer.AutoReset = true;
-			timer.Enabled = true;
-
-			_timers.Add(timer);
+			while(true)
+            {
+				GameLogic.Instance.Update();
+				Thread.Sleep(0);
+            }
 		}
+
+		// 게임의 Db 접근을 담당한다.
+		static void GameDbTask()
+		{
+			while(true)
+            {
+				DbTransaction.Instance.Flush();
+				Thread.Sleep(0);
+            }
+		}
+
+		// BroadCast 시 Client Session에 들어있는 Packet list의 flush를 담당한다.
+		static void NetworkTask()
+        {
+			while(true)
+            {
+				List<ClientSession> sessions = SessionManager.Instance.GetClientSessions();
+				foreach(ClientSession session in sessions)
+                {
+					session.FlushSend();
+                }
+				Thread.Sleep(0);
+            }
+        }
+
 
 		static void Main(string[] args)
 		{
 			ConfigManager.LoadConfig();
 			DataManager.LoadData();
 
-			GameRoom room = RoomManager.Instance.Add(1);
-			TickRoom(room, 50);
+			GameLogic.Instance.Push(() => { GameRoom room = GameLogic.Instance.Add(1); });
 
 			// DNS (Domain Name System)
 			string host = Dns.GetHostName();
@@ -50,14 +72,18 @@ namespace Server
 			_listener.Init(endPoint, () => { return SessionManager.Instance.Generate(); });
 			Console.WriteLine("Listening...");
 
-			//FlushRoom();
-			//JobTimer.Instance.Push(FlushRoom);
+			{
+				// 하나의 스레드를 생성한 뒤 이를 던져둔다.
+				Task gameLogicTask = new Task(GameLogicTask, TaskCreationOptions.LongRunning);
+				gameLogicTask.Start();
+			}
+			{
+				// 하나의 스레드를 생성한 뒤 이를 던져둔다.
+				Task networkTask = new Task(NetworkTask, TaskCreationOptions.LongRunning);
+				networkTask.Start();
+			}
+			GameDbTask();
 
-			// DB Job들을 처리할 수 있게
-			while(true)
-            {
-				DbTransaction.Instance.Flush();
-            }
 		}
 	}
 }
