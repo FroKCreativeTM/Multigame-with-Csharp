@@ -74,15 +74,18 @@ namespace Server
 
 			{
 				// 하나의 스레드를 생성한 뒤 이를 던져둔다.
-				Task gameLogicTask = new Task(GameLogicTask, TaskCreationOptions.LongRunning);
-				gameLogicTask.Start();
+				Thread dbLogicThread = new Thread(GameDbTask);
+				dbLogicThread.Name = "DB";
+				dbLogicThread.Start();
 			}
 			{
 				// 하나의 스레드를 생성한 뒤 이를 던져둔다.
-				Task networkTask = new Task(NetworkTask, TaskCreationOptions.LongRunning);
-				networkTask.Start();
+				Thread networkLogicThread = new Thread(NetworkTask);
+				networkLogicThread.Name = "Network Send";
+				networkLogicThread.Start();
 			}
-			GameDbTask();
+			Thread.CurrentThread.Name = "Game Logic";
+			GameLogicTask();
 
 		}
 	}

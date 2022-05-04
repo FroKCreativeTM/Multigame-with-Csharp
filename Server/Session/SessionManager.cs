@@ -15,7 +15,7 @@ namespace Server
 		object _lock = new object();
 
 		public List<ClientSession> GetClientSessions()
-        {
+		{
 			List<ClientSession> sessions = new List<ClientSession>();
 
 			lock (_lock)
@@ -24,6 +24,7 @@ namespace Server
 			}
 
 			return sessions;
+		}
 
 		public ClientSession Generate()
 		{
