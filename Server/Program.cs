@@ -86,7 +86,6 @@ namespace Server
 			}
 			Thread.CurrentThread.Name = "Game Logic";
 			GameLogicTask();
-
 		}
 	}
 }
